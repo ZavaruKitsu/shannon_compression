@@ -1,0 +1,387 @@
+Stack Overflow
+About
+Products
+For Teams
+Search…
+ 
+Home
+PUBLIC
+Questions
+Tags
+Users
+COLLECTIVES
+Explore Collectives
+FIND A JOB
+Jobs
+Companies
+Python - difference between two strings
+Asked 8 years, 3 months ago
+Active 4 months ago
+Viewed 198k times
+
+104
+
+
+21
+I'd like to store a lot of words in a list. Many of these words are very similar. For example I have word afrykanerskojęzyczny and many of words like afrykanerskojęzycznym, afrykanerskojęzyczni, nieafrykanerskojęzyczni. What is the effective (fast and giving small diff size) solution to find difference between two strings and restore second string from the first one and diff?
+
+python
+string
+python-3.x
+diff
+Share
+Follow
+edited Jun 22 '15 at 14:28
+
+Hunsu
+3,02577 gold badges2626 silver badges5858 bronze badges
+asked Jul 28 '13 at 1:22
+
+user2626682
+1,04922 gold badges77 silver badges33 bronze badges
+1
+What do you mean by "restore the second string from the first one and diff"? – 
+jrd1
+ Jul 28 '13 at 1:29
+2
+I believe he means "Make the second string the same as the first". – 
+Elias Benevedes
+ Jul 28 '13 at 1:39
+1
+@EliasBenevedes, exactly :). – 
+user2626682
+ Jul 28 '13 at 1:44
+1
+Are you looking for something like difflib? If so, see, e.g., stackoverflow.com/questions/774316/… – 
+torek
+ Jul 28 '13 at 2:35
+Add a comment
+5 Answers
+Не нашли ответ? Задайте вопрос на Stack Overflow на русском.
+
+
+131
+
+You can use ndiff in the difflib module to do this. It has all the information necessary to convert one string into another string.
+
+A simple example:
+
+import difflib
+
+cases=[('afrykanerskojęzyczny', 'afrykanerskojęzycznym'),
+       ('afrykanerskojęzyczni', 'nieafrykanerskojęzyczni'),
+       ('afrykanerskojęzycznym', 'afrykanerskojęzyczny'),
+       ('nieafrykanerskojęzyczni', 'afrykanerskojęzyczni'),
+       ('nieafrynerskojęzyczni', 'afrykanerskojzyczni'),
+       ('abcdefg','xac')] 
+
+for a,b in cases:     
+    print('{} => {}'.format(a,b))  
+    for i,s in enumerate(difflib.ndiff(a, b)):
+        if s[0]==' ': continue
+        elif s[0]=='-':
+            print(u'Delete "{}" from position {}'.format(s[-1],i))
+        elif s[0]=='+':
+            print(u'Add "{}" to position {}'.format(s[-1],i))    
+    print()      
+prints:
+
+afrykanerskojęzyczny => afrykanerskojęzycznym
+Add "m" to position 20
+
+afrykanerskojęzyczni => nieafrykanerskojęzyczni
+Add "n" to position 0
+Add "i" to position 1
+Add "e" to position 2
+
+afrykanerskojęzycznym => afrykanerskojęzyczny
+Delete "m" from position 20
+
+nieafrykanerskojęzyczni => afrykanerskojęzyczni
+Delete "n" from position 0
+Delete "i" from position 1
+Delete "e" from position 2
+
+nieafrynerskojęzyczni => afrykanerskojzyczni
+Delete "n" from position 0
+Delete "i" from position 1
+Delete "e" from position 2
+Add "k" to position 7
+Add "a" to position 8
+Delete "ę" from position 16
+
+abcdefg => xac
+Add "x" to position 0
+Delete "b" from position 2
+Delete "d" from position 4
+Delete "e" from position 5
+Delete "f" from position 6
+Delete "g" from position 7
+Share
+Follow
+edited Jul 28 '13 at 4:39
+answered Jul 28 '13 at 4:25
+
+dawg
+85.8k1919 gold badges118118 silver badges194194 bronze badges
+18
++1 Python has so many useful modules. It seems that I learn about a new one each day. – 
+arshajii
+ Jul 28 '13 at 4:29
+1
+This is stepping through the difference manually; restoring the different between the two strings, of course, is much easier with difflib.restore – 
+dawg
+ Jul 28 '13 at 4:48
+Thanks! But i'm not sure if this is memory efficient. list(difflib.ndiff("afrykanerskojęzyczny","nieafrykanerskojęzyczny")) ['+ n', '+ i', '+ e', ' a', ' f', ' r', ' y', ' k', ' a', ' n', ' e', ' r', ' s', ' k', ' o', ' j', ' ę', ' z', ' y', ' c', ' z', ' n', ' y'] – 
+user2626682
+ Jul 28 '13 at 11:08
+1
+ndiff is a generator so it is quite memory efficient. You are calling list on it which turns the individually generated character comparisons into a full list of them. You would only have a few in memory at a time if you did't call list on it. – 
+dawg
+ Jul 28 '13 at 13:54 
+1
+Works on Python 2 as well (for me) I would suggest asking a question with the specific source and specific output. I cannot debug in comments... – 
+dawg
+ May 6 '16 at 17:24
+Show 7 more comments
+
+37
+
+I like the ndiff answer, but if you want to spit it all into a list of only the changes, you could do something like:
+
+import difflib
+
+case_a = 'afrykbnerskojęzyczny'
+case_b = 'afrykanerskojęzycznym'
+
+output_list = [li for li in difflib.ndiff(case_a, case_b) if li[0] != ' ']
+Share
+Follow
+edited Oct 4 '18 at 8:57
+
+ewerybody
+1,1361212 silver badges2727 bronze badges
+answered Sep 21 '17 at 16:51
+
+Eric
+56255 silver badges44 bronze badges
+3
+This is just what I was Googling for. One quick note, @Eric, your variables don't match as shown today, 20180905. Either 1) change the last line to output_list = [li for li in list(difflib.ndiff(case_a,case_b)) if li[0] != ' '] or 2) Change the string variables' names as case_a -> a and case_b -> b. Cheers! – 
+bballdave025
+ Sep 5 '18 at 18:03
+4
+It might also be helpful to show the output of your command: >>> output_list ; #result# ['- b', '+ a', '+ m'] – 
+bballdave025
+ Sep 5 '18 at 18:06 
+2
+if not li.startswith(' ') is the eqivalent of if li[0] != ' ' Some may find it more legible. Or even if item.startswith(('-', '+', )) – 
+dmmfll
+ Aug 24 '19 at 13:19 
+@DMfll Downvote. Lists don't have startswith() as of python 3.7.4 – 
+Nathan
+ Sep 1 '19 at 1:28 
+1
+@Nathan you can't downvote comments, and while you're correct that lists don't have startswith, you've completely screwed up on the type. li is a string, not a list, and strings have had startswith() since at least 2012. Strings are indexable in the same way as arrays, because a string is essentially a glorified unsigned (w)char[], which in fact is an array. Try running the code - output_list = [li for li in difflib.ndiff(case_a, case_b) if not li.startswith(' ')] works perfectly fine for me on 3.9 – 
+Zoe
+♦
+ Jul 20 at 19:34 
+Show 1 more comment
+
+3
+
+You can look into the regex module (the fuzzy section). I don't know if you can get the actual differences, but at least you can specify allowed number of different types of changes like insert, delete, and substitutions:
+
+import regex
+sequence = 'afrykanerskojezyczny'
+queries = [ 'afrykanerskojezycznym', 'afrykanerskojezyczni', 
+            'nieafrykanerskojezyczni' ]
+for q in queries:
+    m = regex.search(r'(%s){e<=2}'%q, sequence)
+    print 'match' if m else 'nomatch'
+Share
+Follow
+answered Jul 28 '13 at 3:26
+
+perreal
+87.9k1818 gold badges141141 silver badges169169 bronze badges
+Add a comment
+
+3
+
+What you are asking for is a specialized form of compression. xdelta3 was designed for this particular kind of compression, and there's a python binding for it, but you could probably get away with using zlib directly. You'd want to use zlib.compressobj and zlib.decompressobj with the zdict parameter set to your "base word", e.g. afrykanerskojęzyczny.
+
+Caveats are zdict is only supported in python 3.3 and higher, and it's easiest to code if you have the same "base word" for all your diffs, which may or may not be what you want.
+
+Share
+Follow
+answered Sep 21 '16 at 23:16
+
+Craig Silverstein
+12111 bronze badge
+Add a comment
+
+-2
+
+The answer to my comment above on the Original Question makes me think this is all he wants:
+
+loopnum = 0
+word = 'afrykanerskojęzyczny'
+wordlist = ['afrykanerskojęzycznym','afrykanerskojęzyczni','nieafrykanerskojęzyczni']
+for i in wordlist:
+    wordlist[loopnum] = word
+    loopnum += 1
+This will do the following:
+
+For every value in wordlist, set that value of the wordlist to the origional code.
+
+All you have to do is put this piece of code where you need to change wordlist, making sure you store the words you need to change in wordlist, and that the original word is correct.
+
+Share
+Follow
+edited Jul 20 at 19:08
+
+Zoe♦
+24.2k1616 gold badges108108 silver badges146146 bronze badges
+answered Jul 28 '13 at 4:00
+
+Elias Benevedes
+33411 gold badge88 silver badges2424 bronze badges
+Thanks, but actually I'd like to store words like 'nieafrykanerskojęzyczni' in a memory efficient way, using similarity to 'afrykanerskojęzyczny'. – 
+user2626682
+ Jul 28 '13 at 10:35
+Add a comment
+Your Answer
+Sign up or log in
+Post as a guest
+Name
+Email
+Required, but never shown
+
+By clicking “Post Your Answer”, you agree to our terms of service, privacy policy and cookie policy
+
+Not the answer you're looking for? Browse other questions tagged python string python-3.x diff or ask your own question.
+The Overflow Blog
+Introducing Content Health, a new way to keep the knowledge base up-to-date
+Podcast 394: what if you could invest in your favorite developer?
+Featured on Meta
+Now live: A fully responsive profile
+Reducing the weight of our footer
+23 people chatting
+Python
+6 hours ago - Silidrone
+Andras Deak: yesterday
+Aran-Fey: yesterday
+Kevin: yesterday
+Paritosh Singh: yesterday
+MisterMiyagi: yesterday
+cs95: yesterday
+Jon Clements: yesterday
+Linked
+-1
+Regular expression matching in Python
+0
+Extract and store the difference between two or more strings
+33
+Python difflib: highlighting differences inline?
+4
+How to show diff of two string sequences in colors?
+3
+Inverse glob - reverse engineer a wildcard string from file names
+-6
+How to extract unique string of characters from line of text file?
+0
+compair two files and display missing result
+1
+Go through a list of tuples and find similar values in python
+0
+How would I detect duplicate elements of a string from another string in python?
+1
+How to identify common substrings of two strings in Python?
+See more linked questions
+Related
+7071
+What is the difference between String and string in C#?
+6007
+How do I merge two dictionaries in a single expression (take union of dictionaries)?
+6457
+What are metaclasses in Python?
+4130
+Difference between staticmethod and classmethod
+3113
+What is the difference between Python's list methods append and extend?
+7037
+Does Python have a ternary conditional operator?
+3044
+Creating multiline strings in JavaScript
+3212
+What is the difference between __str__ and __repr__?
+3135
+How do I concatenate two lists in Python?
+3593
+Does Python have a string 'contains' substring method?
+Hot Network Questions
+Can you choose to have plant type creatures be unaffected by a casting of Fire Storm?
+BYTE Magazine outside the U.S
+PPA: Install old version
+Why is Heart Rate Recovery after exercise reasonably well described by a mono-exponential decay?
+In JavaScript, how is awaiting the result of an async different than sync calls?
+Flash ADC - Why R/2 at the ends of the resistor ladder?
+Wrong expected value definition in book?
+Is it rude to say "Speak of the devil- Here is Grandma now!"?
+How to keep pee from splattering from the toilet all around the basin and on the floor on old toilets that are really low and have deep water?
+Why do US politicians use the title "czar?"
+Why are we to leave a front-loader clothes washer open, but not the dishwasher?
+Why doesn't a black hole have linear momentum?
+Can 'referre' be translated as 'celebrate'
+Is there any downside to paying off a mortage shortly before moving?
+Newcommand with two optional arguments, one at the end
+Transfer Collision Detection in shader editor into other changes
+Why is a 21.10 built binary not compatible with 21.04 install?
+C++20 Thread Pool
+Can you see the shadow of a spaceship on the Moon while looking towards the Earth?
+How to write a text below a math operator
+What is the input impedance of this circuit?
+Since there's "Zulu" time, is there also "Alpha" time?
+Attach arrow head to curveto decoration
+Retrieve data from disk after dd
+ Question feed
+
+STACK OVERFLOW
+Questions
+Jobs
+Developer Jobs Directory
+Salary Calculator
+Help
+Mobile
+Disable Responsiveness
+PRODUCTS
+Teams
+Talent
+Advertising
+Enterprise
+COMPANY
+About
+Press
+Work Here
+Legal
+Privacy Policy
+Terms of Service
+Contact Us
+Cookie Settings
+Cookie Policy
+STACK EXCHANGE
+NETWORK
+Technology
+Life & arts
+Culture & recreation
+Science
+Professional
+Business
+API
+Data
+Blog
+Facebook
+Twitter
+LinkedIn
+Instagram
+site design / logo © 2021 Stack Exchange Inc; user contributions licensed under cc by-sa. rev 2021.11.19.40795
