@@ -1,6 +1,6 @@
-###################################
-# Practice configuration file #
-###################################
+######################
+# Configuration file #
+######################
 
 # AZAR ARCHIVE STRUCTURE:
 #
@@ -12,7 +12,7 @@
 # MAGIC_SEPARATOR
 # DATA
 
-# ZavaruKitsu ARchive
+# ZavaruKitsu ARchive (former AlexeyZavar)
 ARCHIVE_EXTENSION = 'azar'
 
 #
